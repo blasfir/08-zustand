@@ -5,20 +5,18 @@ import { useQuery } from "@tanstack/react-query";
 import NoteList from "../../../../components/NoteList/NoteList";
 import Pagination from "../../../../components/Pagination/Pagination";
 import SearchBox from "../../../../components/SearchBox/SearchBox";
-import Modal from "../../../../components/Modal/Modal";
-import NoteForm from "../../../../components/NoteForm/NoteForm";
 import css from "./page.module.css";
 import { useDebounce } from "use-debounce";
 import { fetchNotes } from "../../../../lib/api";
 import type { NOTEHUBResponse } from "../../../../lib/api";
 import type { Note } from "../../../../types/note";
+import Link from "next/link";
 
 type Props = {
   tag?: string;
 };
 
 export default function Notes({ tag }: Props) {
-  const [isModalOpen, setIsModalOpen] = useState(false);
   const [page, setPage] = useState(1);
   const [pageCount, setPageCount] = useState(0);
   const [search, setSearch] = useState("");
@@ -55,19 +53,14 @@ export default function Notes({ tag }: Props) {
             pageCount={pageCount}
           />
         )}
-        <button className={css.button} onClick={() => setIsModalOpen(true)} type="button">
+         <Link href="/notes/action/create" className={css.createButton}>
           Create note +
-        </button>
+        </Link>
       </header>
 
       {isLoading && <strong>Loading...</strong>}
       {notes.length > 0 && <NoteList notes={notes} />}
 
-      {isModalOpen && (
-        <Modal onClose={() => setIsModalOpen(false)}>
-          <NoteForm onSuccess={() => setIsModalOpen(false)} onCancel={() => setIsModalOpen(false)} />
-        </Modal>
-      )}
     </div>
   );
 }
