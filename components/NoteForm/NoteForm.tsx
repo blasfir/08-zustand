@@ -6,20 +6,14 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import type { NewNote } from "../../types/note";
 import css from "./NoteForm.module.css";
 import { useRouter } from "next/navigation";
-import { useNoteDraftStore } from '@/lib/stores/noteStore';
+import { useNoteDraftStore } from '@/lib/store/noteStore';
 
-const initialValues: NewNote = {
-  title: "",
-  content: "",
-  tag: "",
-};
 
 export default function NoteForm() {
   const queryClient = useQueryClient();
   const router = useRouter();
   const { draft, setDraft, clearDraft } = useNoteDraftStore();
 
-  const [values, setValues] = useState<NewNote>(initialValues);
   const [errors, setErrors] = useState<Partial<Record<keyof NewNote, string>>>(
     {}
   );
@@ -65,23 +59,21 @@ export default function NoteForm() {
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
   ) => {
     const { name, value } = e.target;
-    setValues((prev) => ({ ...prev, [name]: value }));
     setDraft({
       ...draft,
-      [e.target.name]: e.target.value,
+      [name]: value,
     });
   };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    const validationErrors = validate(values);
+    const validationErrors = validate(draft);
     if (Object.keys(validationErrors).length > 0) {
       setErrors(validationErrors);
       return;
     }
     setErrors({});
-    await mutation.mutateAsync(values);
-    setValues(initialValues);
+    await mutation.mutateAsync(draft);
   };
 
   return (
@@ -92,7 +84,7 @@ export default function NoteForm() {
           id="title"
           name="title"
           type="text"
-          value={values.title}
+          value={draft.title}
           onChange={handleChange}
           className={css.input}
         />
@@ -105,7 +97,7 @@ export default function NoteForm() {
           id="content"
           name="content"
           rows={8}
-          value={values.content}
+          value={draft.content}
           onChange={handleChange}
           className={css.textarea}
         />
@@ -117,7 +109,7 @@ export default function NoteForm() {
         <select
           id="tag"
           name="tag"
-          value={values.tag}
+          value={draft.tag}
           onChange={handleChange}
           className={css.select}
         >
